@@ -3,21 +3,27 @@ import argparse
 def cipher_logic(text, shift):
 
     result="" 
+
     for l in text:
+
         if(l==" " or l=="," or l=="/" or l=="!" or l=="."):
             result+=l
+
         elif(l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
             p=ord(l)
             q=p-65
             t=q+shift
+
             t=t%26
             t=t+65
             io=chr(t)
             result+=io
+
         elif(l in "abcdefghijklmnopqrstuvwxyz"):
             p1=ord(l)
             q1=p1-97
             t1=q1+shift
+
             t1=(t1)%26
             t1=t1+97
             io1=chr(t1)
@@ -49,13 +55,16 @@ def score_count(text):
 def crack_cipher(encrypted_text):
 
     leaderboard=[]
+
     for i in range(1,26):
         testx=cipher_logic(encrypted_text,-i)
         score=score_count(testx)
         tuple1=(score,i,testx)
+
         leaderboard.append(tuple1)
     leaderboard.sort()
     leaderboard.reverse()
+    
     return leaderboard[0][2],leaderboard[1][2],leaderboard[2][2]
 
 parser=argparse.ArgumentParser("A Caesar cipher text value")
