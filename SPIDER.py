@@ -74,15 +74,15 @@ def hash_fn(encrypted_txt,unencrypted_txt):     ## creating a function for hashi
     sti=p2+"||"+encrypted_txt                   ## combining the encrypted text and the hash to form a single string
     return sti
 
-def verify_fn(packaged_txt,shift):
-    parts = packaged_txt.split("||")
-    decrypted_txt=cipher_logic(parts[1],-shift)
-    oc=decrypted_txt.encode()
-    p3=hashlib.sha256(oc).hexdigest()
-    if(p3==parts[0]):
-        print("SUCCESS: FILE IS AUTHENTIC")
+def verify_fn(packaged_txt,shift):              ## creating a function for verification for the hash
+    parts = packaged_txt.split("||")            ## splitting the pacckaged text to hash and the encrypted text
+    decrypted_txt=cipher_logic(parts[1],-shift) ## decrypting the encrypted text
+    oc=decrypted_txt.encode()                   ## converting the decrypted text to bytes
+    p3=hashlib.sha256(oc).hexdigest()           ## calculating the hash in the form of hex for the decrypted text
+    if(p3==parts[0]):                        
+        print("SUCCESS: FILE IS AUTHENTIC")     ## if both the hashes are equal
     else:
-        print("FILE IS TAMPERED")
+        print("FILE IS TAMPERED")               ## if both the hashes are not equal
     
     return decrypted_txt
 
