@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 
 def cipher_logic(text, shift):
 
@@ -67,11 +68,30 @@ def crack_cipher(encrypted_text):    ## creating a funciton for doing the freque
 
     return leaderboard[0][2],leaderboard[1][2],leaderboard[2][2]
 
+def hash_fn(encrypted_txt,unencrypted_txt):     ## creating a function for hashing
+    t=unencrypted_txt.encode()                  ## converting it to bytes
+    p2=hashlib.sha256(t).hexdigest()            ## using sha256 algorithm to hash it and convert it to hex format
+    sti=p2+"||"+encrypted_txt                   ## combining the encrypted text and the hash to form a single string
+    return sti
+
+def verify_fn(packaged_txt,shift):
+    parts = packaged_txt.split("||")
+    decrypted_txt=cipher_logic(parts[1],-shift)
+    oc=decrypted_txt.encode()
+    p3=hashlib.sha256(oc).hexdigest()
+    if(p3==parts[0]):
+        print("SUCCESS: FILE IS AUTHENTIC")
+    else:
+        print("FILE IS TAMPERED")
+    
+    return decrypted_txt
+
 parser=argparse.ArgumentParser("A Caesar cipher text value")
 
 parser.add_argument("action", choices=["encrypt","decrypt","crack"])     ## creating an arguement to check the CLI interface to see what we need to do
 parser.add_argument("filename")                                          ## creating an arguement to parse the filename
 parser.add_argument("--shift", type=int, default=3)                      ## creating an arguement to check what number should we shift the original text    
+parser.add_argument("--verify", action="store_true")                     ## creating an argeument to check if the user has called the verify to create a hash or not
 
 args=parser.parse_args()                                                 ## combining all the arguements into a list
 #print(args)
@@ -80,11 +100,16 @@ raw_text=read_text(args.filename)                                        ## gett
 
 if(args.action=='encrypt'):                                              ## if the action provided by the user was encrypt.....
     final_text=cipher_logic(raw_text,args.shift)                         ## we are encrypting the text
+    if(args.verify):
+        final_text=hash_fn(final_text,raw_text)
     write_text("encrypted_"+args.filename,final_text)                    ## creating a new file as encrypted text 
 
 elif(args.action=='decrypt'):                                            ## if the action provided by the user was decrypt.....
-    final_text=cipher_logic(raw_text,-args.shift)                        ## we are decrypting the text
-    write_text("decrypted_"+args.filename,final_text)                    ## creating the new file as decrypted text
+    if(args.verify):
+        final_text=verify_fn(raw_text, args.shift)                       ## if verify is there means hash function is called and checks if the file is tampered
+    else:
+        final_text = cipher_logic(raw_text, -args.shift)                 ## if the verify function is not called means normal cipher_logic function is called
+    
 
 elif(args.action=='crack'):                                              ## if the action provided by the user as crack without giving the shift number
     final_text=crack_cipher(raw_text)                                    ## using the crack_cipher function to crack it
