@@ -45,7 +45,7 @@ def aesdescrypt(ciphertext,key,iv):                                             
 
 def encrypt_file(filepath):                                                          ## creating a function for getting the data from the files in the form of bytes and passing it through the encryption engine
     
-    with open("public.pem",'rb') as file:
+    with open(filepath,'rb') as file:
         file_bytes=file.read()                                                       ## creating a variable and putting the data from the file in the bytes format
 
     aes_key=os.urandom(32)    
@@ -105,8 +105,28 @@ def decrypt_file(filepath):                                                     
         print("THE FILE IS TAMPERED")
         return                                                                         ## does not return the corrupted output as we know that the file has been tampered
         
-    
+
     with open(filepath,'wb') as file:                                                  ## if the hashes are equal means the output bytes are then entered in a file
         file.write(real_text)
 
 
+parser=argparse.ArgumentParser()
+parser.add_argument("action", choices=["encrypt","decrypt","keygen"])                  ## creating an arguement to check the CLI interface to see what we need to do
+parser.add_argument("filename",nargs="?")                                              ## creating an arguement to parse the filename
+
+args=parser.parse_args()                                                               ## creating a namespace consisting of all the parse arguements
+
+if (args.action=="encrypt"):                                                           ## if the action provided by the user is encrypt....
+    if args.filename:
+        encrypt_file(args.filename)
+    else:
+        print("ERROR: You must provide a filename to encrypt!")
+        
+elif (args.action=='decrypt'):                                                         ## if the action provided by the user is decrypt....
+    if args.filename:
+        decrypt_file(args.filename)
+    else:
+        print("ERROR: You must provide a filename to decrypt!")
+
+elif (args.action=="keygen"):
+    key_gen()
