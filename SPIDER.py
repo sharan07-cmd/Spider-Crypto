@@ -7,10 +7,10 @@ def cipher_logic(text, shift):
 
     for l in text:
 
-        if(l==" " or l=="," or l=="/" or l=="!" or l=="."):  ## checking for special characters
+        if(l==" " or l=="," or l=="/" or l=="!" or l=="." or l=="@" or l=="$"):  ## checking for special characters
             result+=l
 
-        elif(l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
+        elif(l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"):             ## checking for UPPERCASE letters
             p=ord(l)
             q=p-65                   ## subtracting 65 because we are converting the ASCII values of each letter to 1,2,3.... so that we can perform modular division by 26
             t=q+shift                ## adding the shift
@@ -20,7 +20,7 @@ def cipher_logic(text, shift):
             io=chr(t)                ## finding the character
             result+=io               ## finally adding it to the result
 
-        elif(l in "abcdefghijklmnopqrstuvwxyz"):
+        elif(l in "abcdefghijklmnopqrstuvwxyz"):             ## checking for lowercase letters
             p1=ord(l)                ## getting the ASCII value
             q1=p1-97                 ## subtracting 97 because the ASCII value of a is 97 and we can use it for performing the modular arithemetic division by 26
             t1=q1+shift              ## we are adding the secret shift number
@@ -30,6 +30,13 @@ def cipher_logic(text, shift):
             io1=chr(t1)              ## finding the character
             result+=io1              ## adding it to the result
         
+        elif (l in "0123456789"):                            ## checking for numbers
+            p4=ord(l)                ## finding the ASCII value of the number
+            q4=p4-48                 ## converting it to the index for the numbers starting from 0
+            q5=(q4+shift)%10         ## encrypting the message by adding the shift and performing the modular division to wrap it around 10
+            q5=q5+48                 ## again converting it to the ASCII value
+            result+=chr(q5)          ## adding the character of the ASCII value to the result 
+
     return result
 #print(cipher_logic("SHARAN",3))
 
