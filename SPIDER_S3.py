@@ -23,6 +23,7 @@ def aesencrypt(databytes,key,iv):                                               
 
     padder=padding.PKCS7(128).padder()                                               ## calling the PKCS7 algorithm so that padding can be done
     padded_data=padder.update(databytes)+padder.finalize()                           ## making the data multiple of 16 bytes so that it can be passed through the AES
+
     cipher=Cipher(algorithms.AES(key),modes.CBC(iv))                                 ## calling the AES in CBC mode
     encryptor=cipher.encryptor()                                                     ## Setting the AES to encryptor mode 
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()                ## passing the padded data through the AES ENCRYPTOR engine
@@ -34,12 +35,14 @@ def aesdescrypt(ciphertext,key,iv):                                             
     cipher=Cipher(algorithms.AES(key),modes.CBC(iv))                                 ## calling the AES algorithm in CBC mode and passing the key and iv through it
     decryptor= cipher.decryptor()                                                    ## setting it in decryption mode
     padded_data=decryptor.update(ciphertext)+decryptor.finalize()                    ## passing the ciphertext through the decryption engine
+    
     unpadder=padding.PKCS7(128).unpadder()                                           ## Unpadding should be done to get the original text. So we are calling the PKCS7 algorithm in unpadding mode
     original_text=unpadder.update(padded_data)+unpadder.finalize()                   ## passing the text with the padding
 
     return original_text
 
 def encrypt_file(filepath,password):                                   ## creating a function for getting the data from the files in the form of bytes and passing it through the encryption engine
+    
     with open(filepath,'rb') as file:
         file_bytes=file.read()                                         ## creating a variable and putting the data from the file in the bytes format
         iv=os.urandom(16)                                              ## randomly generating a 16 byte iv
