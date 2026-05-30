@@ -90,6 +90,6 @@ if (args.action=="encrypt"):                                             ## if t
     password=input("Enter the password of your vault: ")                 ## getting the password from the user
     ciphertext=encrypt_file(args.filename,password)                      ## calling the encrytpion function and finding the ciphertext
 
-elif (args.action=='decrypt'):                                           ## if the action provided by the user is decrypt....
+elif (args.action=='decrypt'):                                             ## if the action provided by the user is decrypt....
     password=input("Enter the password of your vault: ")                 ## getting the password from the user
     output_file=decrypt_file(args.filename,password)                     ## getting the output file.

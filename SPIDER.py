@@ -7,7 +7,7 @@ def cipher_logic(text, shift):
 
     for l in text:
 
-        if(l==" " or l=="," or l=="/" or l=="!" or l=="." or l=="@" or l=="$"):  ## checking for special characters
+        if(l==" " or l=="," or l=="/" or l=="!" or l=="." or l=="@" or l=="$" or l=="&"):  ## checking for special characters
             result+=l
 
         elif(l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"):             ## checking for UPPERCASE letters
@@ -76,6 +76,7 @@ def crack_cipher(encrypted_text):    ## creating a funciton for doing the freque
     return leaderboard[0][2],leaderboard[1][2],leaderboard[2][2]
 
 def hash_fn(encrypted_txt,unencrypted_txt):     ## creating a function for hashing
+    unencrypted_txt=unencrypted_txt.strip()
     t=unencrypted_txt.encode()                  ## converting it to bytes
     p2=hashlib.sha256(t).hexdigest()            ## using sha256 algorithm to hash it and convert it to hex format
     sti=p2+"||"+encrypted_txt                   ## combining the encrypted text and the hash to form a single string
@@ -84,6 +85,7 @@ def hash_fn(encrypted_txt,unencrypted_txt):     ## creating a function for hashi
 def verify_fn(packaged_txt,shift):              ## creating a function for verification for the hash
     parts = packaged_txt.split("||")            ## splitting the pacckaged text to hash and the encrypted text
     decrypted_txt=cipher_logic(parts[1],-shift) ## decrypting the encrypted text
+    decrypted_txt=decrypted_txt.strip()
     oc=decrypted_txt.encode()                   ## converting the decrypted text to bytes
     p3=hashlib.sha256(oc).hexdigest()           ## calculating the hash in the form of hex for the decrypted text
     if(p3==parts[0]):                        
