@@ -121,8 +121,14 @@ elif(args.action=='decrypt'):                                            ## if t
     
 
 elif(args.action=='crack'):                                              ## if the action provided by the user as crack without giving the shift number
-    final_text=crack_cipher(raw_text)                                    ## using the crack_cipher function to crack it
+                                                                         ## Check if our security hash is attached
+    if "||" in raw_text:
+        parts = raw_text.split("||")
+        actual_ciphertext = parts[1]                                     ## Grab only the encrypted text
+    else:
+        actual_ciphertext = raw_text                                     ## Just in case it's an old file without a hash
 
+    final_text=crack_cipher(actual_ciphertext)
     print("\nTop 3 most likely passwords:")                              ## printing the top 3 possible cracked answers
     print("1.", final_text[0])
     print("2.", final_text[1])
