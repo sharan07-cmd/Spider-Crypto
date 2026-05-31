@@ -71,13 +71,13 @@ def encrypt_file(filepath):                                                     
     total = rsa_encrypted_aes_key + iv + hash1 + ciphertext                          ## combining all the 4 byte values(encrypted aes key,iv, hash1 and ciphertext) 
     
     with open(filepath+".enc",'wb') as file:
-        file.write(total)                                                             ## putting the combined string in the enccrypted file output
+        file.write(total)                                                            ## putting the combined string in the enccrypted file output
 
 
-def decrypt_file(filepath):                                                           ## creating a function for the decryption function of the file
+def decrypt_file(filepath):                                                          ## creating a function for the decryption function of the file
 
     with open(filepath+".enc", 'rb') as file:
-        total1=file.read()                                                            ## collecting the encrypted data and putting into a variable
+        total1=file.read()                                                           ## collecting the encrypted data and putting into a variable
 
     encaes_key=total1[:256]                                                                ## slicing the encrypted aes key using RSA algorithm
     iv=total1[256:272]                                                                     ## slicing the 16 byte iv 
