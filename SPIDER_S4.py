@@ -53,8 +53,6 @@ def encrypt_file(filepath):                                                     
 
     aes_key=os.urandom(32)                                                           ## generating a random 32 byte key for aes
     iv=os.urandom(16)                                                                ## randomly generating a 16 byte iv
-    salt=os.urandom(16)                                                              ## randomly generating a 16 byte salt
-    
     ciphertext=aesencrypt(file_bytes,aes_key,iv)                                     ## getting the cipher text by passing the data(in bytes), key and the iv through the encryption engine
 
     hash1=hashlib.sha256(file_bytes).digest()                                        ## calculating the hash of the original data
@@ -63,14 +61,14 @@ def encrypt_file(filepath):                                                     
         public_key = serialization.load_pem_public_key(key_file.read())
 
     rsa_encrypted_aes_key = public_key.encrypt(                                      ## encrypting the AES key using the RSA algorithm   
-        aes_key,
-        padding=rsa_padding.OAEP(
-            mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+        aes_key,                                                                     ## we are encrypting the AES key using the public key of the receiver so that the key can be sent to the receiver
+        padding=rsa_padding.OAEP(                                                    ## the AES key is to be padded before it passes throught the RSA algorithm, (The padding used is Optimal Asymmetric Encryption Padding)          
+            mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),                         ## 32 bytes of mask is added
+            algorithm=hashes.SHA256(),                                               ## 32 bytes of hash of random string is added  
+            label=None                                                               ## it tells the algorithm to hash a random string
         )
     )
-    total = rsa_encrypted_aes_key + iv + salt + hash1 + ciphertext                    ## combining all the 4 byte values(salt, iv, hash1 and ciphertext) 
+    total = rsa_encrypted_aes_key + iv + hash1 + ciphertext                          ## combining all the 4 byte values(encrypted aes key,iv, hash1 and ciphertext) 
     
     with open(filepath+".enc",'wb') as file:
         file.write(total)                                                             ## putting the combined string in the enccrypted file output
@@ -83,14 +81,13 @@ def decrypt_file(filepath):                                                     
 
     encaes_key=total1[:256]                                                                ## slicing the encrypted aes key using RSA algorithm
     iv=total1[256:272]                                                                     ## slicing the 16 byte iv 
-    salt=total1[272:288]                                                                   ## slicing the 16 byte salt
-    hash1=total1[288:320]                                                                  ## slicing the 32 byte hash of the original text
-    ciphertext=total1[320:]                                                                ## slicing the ciphertext
+    hash1=total1[272:304]                                                                  ## slicing the 32 byte hash of the original text
+    ciphertext=total1[304:]                                                                ## slicing the ciphertext
 
-    with open("private.pem",'rb') as key_file:
-        private_key = serialization.load_pem_private_key(key_file.read(), password=None)
+    with open("private.pem",'rb') as key_file:                                             ## opening the private.pem file in read bytes mode
+        private_key = serialization.load_pem_private_key(key_file.read(), password=None)   
 
-    aes_key = private_key.decrypt(
+    aes_key = private_key.decrypt(                                                         
         encaes_key,
         padding=rsa_padding.OAEP(
             mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),
