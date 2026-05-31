@@ -58,7 +58,7 @@ def encrypt_file(filepath):                                                     
     hash1=hashlib.sha256(file_bytes).digest()                                        ## calculating the hash of the original data
 
     with open("public.pem", "rb") as key_file:
-        public_key = serialization.load_pem_public_key(key_file.read())
+        public_key = serialization.load_pem_public_key(key_file.read())              ## it reads the public key and creates an object
 
     rsa_encrypted_aes_key = public_key.encrypt(                                      ## encrypting the AES key using the RSA algorithm   
         aes_key,                                                                     ## we are encrypting the AES key using the public key of the receiver so that the key can be sent to the receiver
@@ -85,13 +85,13 @@ def decrypt_file(filepath):                                                     
     ciphertext=total1[304:]                                                                ## slicing the ciphertext
 
     with open("private.pem",'rb') as key_file:                                             ## opening the private.pem file in read bytes mode
-        private_key = serialization.load_pem_private_key(key_file.read(), password=None)   
+        private_key = serialization.load_pem_private_key(key_file.read(), password=None)   ## the private key file is then opened to unlock the encrypted file
 
-    aes_key = private_key.decrypt(                                                         
+    aes_key = private_key.decrypt(                                                         ## now the encrypted aes key id decrypted
         encaes_key,
-        padding=rsa_padding.OAEP(
-            mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
+        padding=rsa_padding.OAEP(                                                          ## the paddings are removed
+            mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),                               ## the masking is remvoed
+            algorithm=hashes.SHA256(),                                                     ## the hash is removed
             label=None
         )
     )
@@ -101,7 +101,7 @@ def decrypt_file(filepath):                                                     
 
     if(new_hash==hash1):                                                               ## checking if the hashes are equal
         print("THE FILE IS NOT CORRUPTED")
-    elif(new_hash!=hash1):
+    elif(new_hash!=hash1):                                                             ## if the hashes are not equal......
         print("THE FILE IS TAMPERED")
         return                                                                         ## does not return the corrupted output as we know that the file has been tampered
         
@@ -117,15 +117,15 @@ parser.add_argument("filename",nargs="?")                                       
 args=parser.parse_args()                                                               ## creating a namespace consisting of all the parse arguements
 
 if (args.action=="encrypt"):                                                           ## if the action provided by the user is encrypt....
-    if args.filename:
+    if args.filename:                                                                  ## if there is filename provided by the user....
         encrypt_file(args.filename)                                                    ## calling the encrypt function to encrypt the file
-    else:
+    else:                                                                              ## if there is no filename provided....
         print("ERROR: You must provide a filename to encrypt!")
         
 elif (args.action=='decrypt'):                                                         ## if the action provided by the user is decrypt....
-    if args.filename:
+    if args.filename:                                                                  ## if there is filename provided by the user.....
         decrypt_file(args.filename)                                                    ## calling the decrypt function to decrypt the file
-    else:
+    else:                                                                              ## if there is no filename provided.....
         print("ERROR: You must provide a filename to decrypt!")
 
 elif (args.action=="keygen"):                                                          ## if the action provided by the user is keygen
