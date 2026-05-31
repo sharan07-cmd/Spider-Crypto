@@ -9,14 +9,17 @@ from cryptography.hazmat.primitives.asymmetric import padding as rsa_padding
 from cryptography.hazmat.primitives import serialization
 
 def key_gen():
-    private_key=rsa.generate_private_key(public_exponent=65537, key_size= 2048)
-    public_key=private_key.public_key()
+    private_key=rsa.generate_private_key(public_exponent=65537, key_size= 2048)                         ## the private_key variable has all the necessary values to calculate both the private key and the public key. It acts as a briefcase containing all those
+    public_key=private_key.public_key()                                                                 ## it takes only the public quotient values and the two primes(multiply the two primes) from the private key suitcase
 
-    with open("private.pem",'wb') as file:
-        file.write(private_key.private_bytes(encoding=serialization.Encoding.PEM,format=serialization.PrivateFormat.TraditionalOpenSSL,encryption_algorithm=serialization.NoEncryption()))
+    with open("private.pem",'wb') as file:                                                              ## opening a privatee.pem file in write bytes mode
+        file.write(private_key.private_bytes(encoding=serialization.Encoding.PEM,                       ## this tells in which form the output data should be stored in the pem file(it uses base64 and dumps the binary data in english in the file)
+                                             format=serialization.PrivateFormat.TraditionalOpenSSL,     ## this tells in which way the mathematical data should be arranged in the file    
+                                             encryption_algorithm=serialization.NoEncryption()))        ## this tells that no encryption is required for the private.pem file
 
     with open("public.pem",'wb') as file:
-        file.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo))
+        file.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,                         ## this tells that in what way the output data should be presented, that is in eiher english using base64 or raw binary data
+                                           format=serialization.PublicFormat.SubjectPublicKeyInfo))     ## this line tells how to format the public key
     
     print("SUCCESS: RSA Keypair generated and saved!")
 
@@ -48,7 +51,7 @@ def encrypt_file(filepath):                                                     
     with open(filepath,'rb') as file:
         file_bytes=file.read()                                                       ## creating a variable and putting the data from the file in the bytes format
 
-    aes_key=os.urandom(32)    
+    aes_key=os.urandom(32)                                                           ## generating a random 32 byte key for aes
     iv=os.urandom(16)                                                                ## randomly generating a 16 byte iv
     salt=os.urandom(16)                                                              ## randomly generating a 16 byte salt
     
@@ -59,7 +62,7 @@ def encrypt_file(filepath):                                                     
     with open("public.pem", "rb") as key_file:
         public_key = serialization.load_pem_public_key(key_file.read())
 
-    rsa_encrypted_aes_key = public_key.encrypt(
+    rsa_encrypted_aes_key = public_key.encrypt(                                      ## encrypting the AES key using the RSA algorithm   
         aes_key,
         padding=rsa_padding.OAEP(
             mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),
@@ -78,11 +81,11 @@ def decrypt_file(filepath):                                                     
     with open(filepath+".enc", 'rb') as file:
         total1=file.read()                                                            ## collecting the encrypted data and putting into a variable
 
-    encaes_key=total1[:256]
-    iv=total1[256:272]
-    salt=total1[272:288]
-    hash1=total1[288:320]
-    ciphertext=total1[320:]    
+    encaes_key=total1[:256]                                                                ## slicing the encrypted aes key using RSA algorithm
+    iv=total1[256:272]                                                                     ## slicing the 16 byte iv 
+    salt=total1[272:288]                                                                   ## slicing the 16 byte salt
+    hash1=total1[288:320]                                                                  ## slicing the 32 byte hash of the original text
+    ciphertext=total1[320:]                                                                ## slicing the ciphertext
 
     with open("private.pem",'rb') as key_file:
         private_key = serialization.load_pem_private_key(key_file.read(), password=None)
@@ -118,15 +121,15 @@ args=parser.parse_args()                                                        
 
 if (args.action=="encrypt"):                                                           ## if the action provided by the user is encrypt....
     if args.filename:
-        encrypt_file(args.filename)
+        encrypt_file(args.filename)                                                    ## calling the encrypt function to encrypt the file
     else:
         print("ERROR: You must provide a filename to encrypt!")
         
 elif (args.action=='decrypt'):                                                         ## if the action provided by the user is decrypt....
     if args.filename:
-        decrypt_file(args.filename)
+        decrypt_file(args.filename)                                                    ## calling the decrypt function to decrypt the file
     else:
         print("ERROR: You must provide a filename to decrypt!")
 
-elif (args.action=="keygen"):
-    key_gen()
+elif (args.action=="keygen"):                                                          ## if the action provided by the user is keygen
+    key_gen()                                                                          ## generation of public and private keys are done
