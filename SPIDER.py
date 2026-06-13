@@ -7,10 +7,7 @@ def cipher_logic(text, shift):
 
     for l in text:
 
-        if(l==" " or l=="," or l=="/" or l=="!" or l=="." or l=="@" or l=="$" or l=="&"):  ## checking for special characters
-            result+=l
-
-        elif(l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"):             ## checking for UPPERCASE letters
+        if(l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"):             ## checking for UPPERCASE letters
             p=ord(l)
             q=p-65                   ## subtracting 65 because we are converting the ASCII values of each letter to 1,2,3.... so that we can perform modular division by 26
             t=q+shift                ## adding the shift
@@ -36,6 +33,9 @@ def cipher_logic(text, shift):
             q5=(q4+shift)%10         ## encrypting the message by adding the shift and performing the modular division to wrap it around 10
             q5=q5+48                 ## again converting it to the ASCII value
             result+=chr(q5)          ## adding the character of the ASCII value to the result 
+        
+        else:
+            result+=l                ## takes care of every punctuation, special characters
 
     return result
 #print(cipher_logic("SHARAN",3))
@@ -76,7 +76,6 @@ def crack_cipher(encrypted_text):    ## creating a funciton for doing the freque
     return leaderboard[0][2],leaderboard[1][2],leaderboard[2][2]
 
 def hash_fn(encrypted_txt,unencrypted_txt):     ## creating a function for hashing
-    unencrypted_txt=unencrypted_txt.strip()
     t=unencrypted_txt.encode()                  ## converting it to bytes
     p2=hashlib.sha256(t).hexdigest()            ## using sha256 algorithm to hash it and convert it to hex format
     sti=p2+"||"+encrypted_txt                   ## combining the encrypted text and the hash to form a single string
@@ -85,7 +84,6 @@ def hash_fn(encrypted_txt,unencrypted_txt):     ## creating a function for hashi
 def verify_fn(packaged_txt,shift):              ## creating a function for verification for the hash
     parts = packaged_txt.split("||")            ## splitting the pacckaged text to hash and the encrypted text
     decrypted_txt=cipher_logic(parts[1],-shift) ## decrypting the encrypted text
-    decrypted_txt=decrypted_txt.strip()
     oc=decrypted_txt.encode()                   ## converting the decrypted text to bytes
     p3=hashlib.sha256(oc).hexdigest()           ## calculating the hash in the form of hex for the decrypted text
     if(p3==parts[0]):                        
@@ -118,7 +116,8 @@ elif(args.action=='decrypt'):                                            ## if t
         final_text=verify_fn(raw_text, args.shift)                       ## if verify is there means hash function is called and checks if the file is tampered
     else:
         final_text = cipher_logic(raw_text, -args.shift)                 ## if the verify function is not called means normal cipher_logic function is called
-    
+    write_text("decrypted_" + args.filename, final_text)
+    print(f"File decrypted successfully as decrypted_{args.filename}")
 
 elif(args.action=='crack'):                                              ## if the action provided by the user as crack without giving the shift number
                                                                          ## Check if our security hash is attached

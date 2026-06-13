@@ -76,7 +76,7 @@ def encrypt_file(filepath):                                                     
 
 def decrypt_file(filepath):                                                          ## creating a function for the decryption function of the file
 
-    with open(filepath+".enc", 'rb') as file:
+    with open(filepath, 'rb') as file:
         total1=file.read()                                                           ## collecting the encrypted data and putting into a variable
 
     encaes_key=total1[:256]                                                                ## slicing the encrypted aes key using RSA algorithm
@@ -87,14 +87,18 @@ def decrypt_file(filepath):                                                     
     with open("private.pem",'rb') as key_file:                                             ## opening the private.pem file in read bytes mode
         private_key = serialization.load_pem_private_key(key_file.read(), password=None)   ## the private key file is then opened to unlock the encrypted file
 
-    aes_key = private_key.decrypt(                                                         ## now the encrypted aes key id decrypted
-        encaes_key,
-        padding=rsa_padding.OAEP(                                                          ## the paddings are removed
-            mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),                               ## the masking is remvoed
-            algorithm=hashes.SHA256(),                                                     ## the hash is removed
-            label=None
+    try:
+        aes_key = private_key.decrypt(                                                         ## now the encrypted aes key id decrypted
+            encaes_key,
+            padding=rsa_padding.OAEP(                                                          ## the paddings are removed
+                mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),                               ## the masking is remvoed
+                algorithm=hashes.SHA256(),                                                     ## the hash is removed
+                label=None
+            )
         )
-    )
+    except ValueError:
+        print("Decryption Failed. Incorrect Private Key")
+        return
 
     real_text=aesdescrypt(ciphertext,aes_key,iv)                                       ## passing the cipher text, the iv and the key which we obtained in the previous steps through the decryption funciton
     new_hash=hashlib.sha256(real_text).digest()                                        ## calculating the hash of the text which we decrypted in the previous step
@@ -104,9 +108,13 @@ def decrypt_file(filepath):                                                     
     elif(new_hash!=hash1):                                                             ## if the hashes are not equal......
         print("THE FILE IS TAMPERED")
         return                                                                         ## does not return the corrupted output as we know that the file has been tampered
-        
+    
+    if filepath.endswith(".enc"):                                      
+        output_filepath = filepath[:-4] 
+    else:
+        output_filepath = "decrypted_" + filepath
 
-    with open(filepath,'wb') as file:                                                  ## if the hashes are equal means the output bytes are then entered in a file
+    with open(output_filepath, 'wb') as file:                                          ## if the hashes are equal means the output bytes are then entered in a file
         file.write(real_text)
 
 

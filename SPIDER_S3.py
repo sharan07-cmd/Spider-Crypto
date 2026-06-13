@@ -60,7 +60,7 @@ def encrypt_file(filepath,password):                                   ## creati
 
 def decrypt_file(filepath,password):                                   ## creating a function for the decryption function of the file
 
-    with open(filepath+".enc", 'rb') as file:
+    with open(filepath, 'rb') as file:
         total1=file.read()                                             ## collecting the encrypted data and putting into a variable
         salt=total1[:16]                                               ## getting the salt using string splicing(here 0-15 because salt is a 16 byte value)
         iv=total1[16:32]                                               ## getting the iv using string splicing (here 16-31 because the iv is also a 16 byte value)                                              
@@ -77,7 +77,12 @@ def decrypt_file(filepath,password):                                   ## creati
             print("THE FILE IS TAMPERED")
             return                                                     ## does not return the corrupted output as we know that the file has been tampered
     
-    with open(filepath,'wb') as file:                                  ## if the hashes are equal means the output bytes are then entered in a file
+    if filepath.endswith(".enc"):                                      ## checking if the filepath ends with .enc
+        output_filepath = filepath[:-4] 
+    else:
+        output_filepath = "decrypted_" + filepath
+
+    with open(output_filepath, 'wb') as file:                          ## opening the file to write to the decrypted text
         file.write(real_text)
 
 parser=argparse.ArgumentParser()
